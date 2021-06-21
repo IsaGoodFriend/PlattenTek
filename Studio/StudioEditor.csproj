@@ -1,0 +1,117 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <AssemblyName>PlattenTek</AssemblyName>
+        <TargetFramework>net452</TargetFramework>
+        <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+        <LangVersion>9</LangVersion>
+        <AssemblyTitle>Celeste Studio</AssemblyTitle>
+        <Product>Celeste Studio</Product>
+        <Copyright>Copyright © 2018</Copyright>
+        <AssemblyVersion>2.3.3.0</AssemblyVersion>
+        <FileVersion>2.3.3.0</FileVersion>
+        <OutputPath>C:\Program Files (x86)\Steam\steamapps\common\Celeste\Mods\PlattenTek\</OutputPath>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+        <DebugType>portable</DebugType>
+        <DefineConstants>TRACE;DEBUG;STUDIO</DefineConstants>
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <NoWarn>1701;1702;IDE1006;IDE0008;IDE0011</NoWarn>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+        <DebugType>portable</DebugType>
+        <DefineConstants>TRACE;STUDIO</DefineConstants>
+        <PlatformTarget>AnyCPU</PlatformTarget>
+    </PropertyGroup>
+    <PropertyGroup>
+        <ApplicationIcon>desktop.ico</ApplicationIcon>
+        <RootNamespace>PlattenTek</RootNamespace>
+    </PropertyGroup>
+    <Import Project="..\StudioCommunication\StudioCommunication.projitems" Label="Shared" />
+    <ItemGroup>
+        <Reference Include="System.Deployment">
+          <Private>false</Private>
+        </Reference>
+        <Reference Include="System.Windows.Forms">
+          <Private>false</Private>
+        </Reference>
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Update="Properties\Settings.Designer.cs">
+          <DesignTimeSharedInput>True</DesignTimeSharedInput>
+          <AutoGen>True</AutoGen>
+          <DependentUpon>Settings.settings</DependentUpon>
+        </Compile>
+        <Compile Update="Studio.cs">
+            <SubType>Form</SubType>
+        </Compile>
+        <Compile Update="Studio.Designer.cs">
+            <DependentUpon>Studio.cs</DependentUpon>
+        </Compile>
+        <EmbeddedResource Update="Properties\Resources.resx">
+            <Generator>ResXFileCodeGenerator</Generator>
+            <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+            <SubType>Designer</SubType>
+        </EmbeddedResource>
+        <Compile Update="Properties\Resources.Designer.cs">
+            <AutoGen>True</AutoGen>
+            <DependentUpon>Resources.resx</DependentUpon>
+            <DesignTime>True</DesignTime>
+        </Compile>
+        <EmbeddedResource Update="Studio.resx">
+            <DependentUpon>Studio.cs</DependentUpon>
+            <SubType>Designer</SubType>
+        </EmbeddedResource>
+    </ItemGroup>
+    <ItemGroup>
+      <None Update="Properties\Settings.settings">
+        <Generator>SettingsSingleFileGenerator</Generator>
+        <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+      </None>
+    </ItemGroup>
+    <ItemGroup>
+      <Reference Update="System">
+        <Private>false</Private>
+      </Reference>
+    </ItemGroup>
+    <ItemGroup>
+      <Reference Update="System.Core">
+        <Private>false</Private>
+      </Reference>
+    </ItemGroup>
+    <ItemGroup>
+      <Reference Update="System.Data">
+        <Private>false</Private>
+      </Reference>
+    </ItemGroup>
+    <ItemGroup>
+      <Reference Update="System.Drawing">
+        <Private>false</Private>
+      </Reference>
+    </ItemGroup>
+    <ItemGroup>
+      <Reference Update="System.IO.Compression.FileSystem">
+        <Private>false</Private>
+      </Reference>
+    </ItemGroup>
+    <ItemGroup>
+      <Reference Update="System.Numerics">
+        <Private>false</Private>
+      </Reference>
+    </ItemGroup>
+    <ItemGroup>
+      <Reference Update="System.Runtime.Serialization">
+        <Private>false</Private>
+      </Reference>
+    </ItemGroup>
+    <ItemGroup>
+      <Reference Update="System.Xml">
+        <Private>false</Private>
+      </Reference>
+    </ItemGroup>
+    <ItemGroup>
+      <Reference Update="System.Xml.Linq">
+        <Private>false</Private>
+      </Reference>
+    </ItemGroup>
+</Project>

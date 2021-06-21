@@ -1,0 +1,7 @@
+/.vs/
+/PlattenTek-Everest/bin/
+/*/obj/
+/PlattenTek-Everest/lib-stripped/
+*.ase
+*.png
+*.xcf
