@@ -25,11 +25,18 @@ namespace PlattekMod.Communication {
         public static void Load() {
             Everest.Events.Level.OnEnter += Level_OnEnter;
             Everest.Events.Level.OnExit += Level_OnExit;
+            Everest.Events.Celeste.OnShutdown += Celeste_OnShutdown;
+        }
+
+        private static void Celeste_OnShutdown() {
+            if (Instance != null && Initialized)
+                Instance.SendClosing();
         }
 
         public static void Unload() {
             Everest.Events.Level.OnEnter -= Level_OnEnter;
             Everest.Events.Level.OnExit -= Level_OnExit;
+            Everest.Events.Celeste.OnShutdown -= Celeste_OnShutdown;
 
         }
 
@@ -99,6 +106,10 @@ namespace PlattekMod.Communication {
             switch (message.Id) {
                 case MessageIDs.EstablishConnection:
                     throw new NeedsResetException("Initialization data recieved in main loop");
+                case MessageIDs.StudioClosing:
+                    Initialized = false;
+                    Logger.Log("PlattenTek", "Hello");
+                    break;
                 case MessageIDs.Wait:
                     ProcessWait();
                     break;
@@ -199,39 +210,6 @@ namespace PlattekMod.Communication {
             Log("ProcessSendPath: " + path);
         }
 
-        private void ProcessToggleGameSetting(byte[] data) {
-            string settingName = Encoding.Default.GetString(data);
-            Log("Toggle game setting: " + settingName);
-            if (settingName.IsNullOrEmpty()) {
-                return;
-            }
-
-            PlattenTekSettings settings = PlattenTekModule.Settings;
-
-            switch (settingName) {
-                case "Copy Custom Info Template to Clipboard":
-                    TextInput.SetClipboardText(settings.InfoCustomTemplate);
-                    return;
-                case "Set Custom Info Template From Clipboard":
-                    settings.InfoCustomTemplate = TextInput.GetClipboardText();
-                    PlattenTekModule.Instance.SaveSettings();
-                    return;
-            }
-
-            if (typeof(PlattenTekSettings).GetProperty(settingName) is { } property) {
-                if (property.GetSetMethod(true) == null) {
-                    return;
-                }
-
-                object value = property.GetValue(settings);
-                if (value is bool boolValue) {
-                    property.SetValue(settings, !boolValue);
-                } else if (value is Enum) {
-                    property.SetValue(settings, ((int) value + 1) % Enum.GetValues(property.PropertyType).Length);
-                }
-            }
-        }
-
         #endregion
 
         #region Write
@@ -283,10 +261,8 @@ namespace PlattekMod.Communication {
         }
 
         private void SendLevelLoaded(Session session = null) {
-
             if (session  == null) {
-                var level = Engine.Scene as Level;
-                if (level == null)
+                if (Engine.Scene is not Level level)
                     level = Engine.NextScene as Level;
 
                 if (level == null)
@@ -301,9 +277,8 @@ namespace PlattekMod.Communication {
             string command = "";
 
             var content = Everest.Content.Get($"Maps/{session.MapData.ModeData.Path}");
-            var asset = content as FileSystemModAsset;
 
-            if (asset == null)
+            if (content is not FileSystemModAsset asset)
                 return;
 
             command += asset.Path + '\n';
@@ -325,22 +300,11 @@ namespace PlattekMod.Communication {
         private void SendLevelUnloaded() {
             WriteMessageGuaranteed(new Message(MessageIDs.UnloadedLevel, new byte[0]));
         }
-
-        private void SendStateAndGameDataNow(string state, string gameData, bool canFail) {
+        private void SendClosing() {
             if (Initialized) {
-                string[] data = new string[] {state, gameData};
-                byte[] dataBytes = ToByteArray(data);
-                Message message = new(MessageIDs.SendState, dataBytes);
-                if (canFail) {
-                    WriteMessage(message);
-                } else {
-                    WriteMessageGuaranteed(message);
-                }
+                WriteMessageGuaranteed(new Message(MessageIDs.ModClosing, new byte[0]));
             }
-        }
 
-        public void SendStateAndGameData(string state, string gameData, bool canFail) {
-            PendingWrite = () => SendStateAndGameDataNow(state, gameData, canFail);
         }
 
         #endregion

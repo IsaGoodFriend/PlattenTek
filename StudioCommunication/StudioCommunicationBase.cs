@@ -14,9 +14,6 @@ namespace PlattekCommunication {
         private static readonly List<StudioCommunicationBase> AttachedCom = new();
         private readonly Mutex mutex;
 
-        //I gave up on using pipes.
-        //Don't know whether i was doing something horribly wrong or if .net pipes are just *that* bad.
-        //Almost certainly the former.
         private readonly MemoryMappedFile sharedMemory;
 
         protected bool Abort;
@@ -70,7 +67,6 @@ namespace PlattekCommunication {
                         if (message != null) {
                             ReadData((Message) message);
                             waiting = false;
-                            Log($"Received Message: {message?.Id}");
                         }
 
                         Thread.Sleep(Timeout);
@@ -147,7 +143,7 @@ namespace PlattekCommunication {
                     return (Message) message;
                 }
 
-                if ( /*Initialized &&*/ ++failedReads > 100) {
+                if (Initialized && ++failedReads > 100) {
                     Log("Read timed out");
                     //throw new NeedsResetException("Read timed out");
                     Initialized = false;
@@ -177,7 +173,7 @@ namespace PlattekCommunication {
                 byte firstByte = reader.ReadByte();
                 if (firstByte != 0 && (!IsHighPriority(message.Id) || IsHighPriority((MessageIDs) firstByte))) {
                     mutex.ReleaseMutex();
-                    if (/*Initialized && */ ++failedWrites > 100) {
+                    if (Initialized && ++failedWrites > 100) {
                         Log("Write timed out");
                         //throw new NeedsResetException("Write timed out");
                         Initialized = false;

@@ -56,6 +56,9 @@ namespace PlattenTek.Communication {
                 case MessageIDs.UnloadedLevel:
                     ProcessUnloadedLevel();
                     break;
+                case MessageIDs.ModClosing:
+                    ProcessModClosing();
+                    break;
                 default:
                     throw new InvalidOperationException($"{message.Id}");
             }
@@ -64,6 +67,10 @@ namespace PlattenTek.Communication {
         private void ProcessSendPath(byte[] data) {
             string path = Encoding.Default.GetString(data);
             Log(path);
+        }
+
+        private void ProcessModClosing() {
+            Studio.Instance.CelesteLevel = null;
         }
 
         private void ProcessLoadedLevel(byte[] data) {
@@ -128,7 +135,6 @@ namespace PlattenTek.Communication {
         }
         private void SendClosingNow(bool canFail) {
             if (Initialized || !canFail) {
-
                 WriteMessageGuaranteed(new Message(MessageIDs.StudioClosing, new byte[0]));
             }
 

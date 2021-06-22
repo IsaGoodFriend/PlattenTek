@@ -35,6 +35,8 @@ namespace PlattenTek {
         private string watchPathDecompile, watchPathCompile;
 
         private string customLoadedLevel;
+        private string projectFolder, binFolder;
+
         public string CurrentFileName {
             get {
                 if (detectLevelMenuItem.Checked && StudioCommunicationBase.Initialized)
@@ -289,24 +291,25 @@ namespace PlattenTek {
 
                 } while (!foundBaseFolder);
 
-                fileName += ".bin";
+                fileName = DecompilerHelper.CreateDirectory(fileName, false) + ".bin";
             }
 
-            string roomsDirectory = Path.Combine(Path.GetDirectoryName(fileName), Path.GetFileNameWithoutExtension(fileName));
+            projectFolder = DecompilerHelper.CreateDirectory(fileName, true);
+            binFolder = DecompilerHelper.CreateDirectory(fileName, false);
 
-            if (!File.Exists(fileName) && !Directory.Exists(roomsDirectory))
+            if (!File.Exists(fileName) && !Directory.Exists(projectFolder))
                 return;
 
             CurrentFileName = fileName;
 
-            watchPathDecompile = roomsDirectory;
+            watchPathDecompile = projectFolder;
             watchPathCompile = Path.GetDirectoryName(fileName);
 
             DecompilerHelper.ResetProgress();
             DestroyWatchers();
 
-            if (!Directory.Exists(roomsDirectory)) {
-                Directory.CreateDirectory(roomsDirectory);
+            if (!Directory.Exists(projectFolder)) {
+                Directory.CreateDirectory(projectFolder);
             }
         }
         private bool FileExists() {
@@ -317,8 +320,7 @@ namespace PlattenTek {
         }
         private bool ProjectExists() {
             string exPath = Path.Combine(
-                Path.GetDirectoryName(CurrentFileName),
-                Path.GetFileNameWithoutExtension(CurrentFileName),
+                projectFolder,
                 BinaryFileNode.ATTRIBUTE_FILE_NAME
                 );
 

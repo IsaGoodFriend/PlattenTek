@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.IO;
 
 namespace PlattenTek {
     public static class DecompilerHelper {
+
+        public const string MAP_DECOMPILED_FOLDER = "Maps_Decompiled";
 
         public static float Progress { get { return (fileProgress + progress) / fileCount; } }
 
@@ -17,6 +20,34 @@ namespace PlattenTek {
         private static int fileCount = 1, fileProgress;
         private static int nodeCount, nodeProgress;
         
+        public static string CreateDirectory(string file, bool makeProjectFolder) {
+            string ext = Path.GetExtension(file);
+
+            file = Path.Combine(Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file));
+            file = file.Replace('\\', '/');
+
+            var binMatch = Regex.Match(file, @"/Mods/([A-Za-z0-9_\s])+/Maps/");
+            var projMatch = Regex.Match(file, @$"/Mods/([A-Za-z0-9_\s])+/{MAP_DECOMPILED_FOLDER}/");
+
+            if (!binMatch.Success && !projMatch.Success)
+                return file;
+
+            string toReplace;
+            int index;
+
+            if (binMatch.Success) {
+                index = binMatch.Index + binMatch.Length - 5;
+            }
+            else {
+                index = projMatch.Index + projMatch.Length - (MAP_DECOMPILED_FOLDER.Length + 1);
+            }
+
+            toReplace = file.Substring(index, file.IndexOf('/', index) - index);
+
+            file = file.Replace(toReplace, makeProjectFolder ? MAP_DECOMPILED_FOLDER : "Maps");
+
+            return file;
+        }
 
         public static void DecompileLevel(string file) {
             DecompileLevel(file, true);
@@ -26,7 +57,7 @@ namespace PlattenTek {
             if (string.IsNullOrWhiteSpace(file) || !File.Exists(file))
                 return;
 
-            string roomsDirectory = Path.Combine(Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file));
+            string roomsDirectory = CreateDirectory(file, true);
 
             if (!Directory.Exists(roomsDirectory))
                 Directory.CreateDirectory(roomsDirectory);
@@ -42,9 +73,7 @@ namespace PlattenTek {
             nodeCount = parser.NodeCount;
             nodeProgress = 0;
 
-            DecompileNode(parser.RootNode, Path.ChangeExtension(file, "/"), false);
-
-            //progress = 1;
+            DecompileNode(parser.RootNode, roomsDirectory, false);
 
         }
         public static void DecompileMultiple(string[] files) {
@@ -65,7 +94,8 @@ namespace PlattenTek {
             fileProgress = 0;
             fileCount = 1;
 
-            string roomsDirectory = Path.Combine(Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file));
+            string roomsDirectory = CreateDirectory(file, true);
+            file = Path.ChangeExtension(CreateDirectory(file, false), ".bin");
 
             nodeCount = Directory.GetFiles(roomsDirectory, "*.binnode", SearchOption.AllDirectories).Length;
             nodeProgress = 0;
@@ -80,7 +110,7 @@ namespace PlattenTek {
 
                 writer.RootNode.Name = "Maps";
 
-                writer.Save(Path.ChangeExtension(file, ".bin"));
+                writer.Save(file);
 
                 writer.Dispose();
             }
