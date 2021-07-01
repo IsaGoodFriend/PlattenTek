@@ -618,7 +618,7 @@ namespace PlattenTek {
 
 			using (FileStream stream = File.Open(_filePath, FileMode.Create)) {
 				using (BinaryWriter writer = new BinaryWriter(stream)) {
-					writer.Write("CELESTE MAPS");
+					writer.Write("CELESTE MAP");
 					writer.Write(LevelName);
 
 					writer.Write((short)stringLookup.Count);
