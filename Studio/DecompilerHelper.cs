@@ -110,7 +110,7 @@ namespace PlattenTek {
 
                 writer.RootNode.Name = "Maps";
 
-                writer.Save(file);
+                writer.Save(file, false);
 
                 writer.Dispose();
             }
@@ -180,7 +180,7 @@ namespace PlattenTek {
             progress = (float)nodeProgress / nodeCount;
 
             if (node.Name == "level") {
-                node.Attributes["name"] = Path.GetFileName(path);
+                node.Attributes["name"] = BinaryFileParser.GetFromSafeString(Path.GetFileName(path));
             }
 
             foreach (var folder in Directory.GetDirectories(path, "*", SearchOption.TopDirectoryOnly)) {

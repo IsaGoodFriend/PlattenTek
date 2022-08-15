@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace PlattenTek {
 	public class BinaryFileNode {
@@ -354,6 +355,33 @@ namespace PlattenTek {
 
 	public class BinaryFileWriter : BinaryWriter {
 
+        public static string GetSafeString(string str) {
+            StringBuilder builder = new StringBuilder();
+
+            foreach (var c in str) {
+                switch (c) {
+                    case '\\':
+                    case '/':
+                    case ':':
+                    case '*':
+                    case '?':
+                    case '"':
+                    case '<':
+                    case '>':
+                    case '|':
+                    case '%':
+                        int value = c;
+                        builder.Append($"%{value:X2}");
+                        break;
+                    default:
+                        builder.Append(c);
+                            break;
+                }
+            }
+
+            return builder.ToString();
+        }
+
 		public const byte
 			BOOLEAN = 0,
 			BYTE = 1,
@@ -610,8 +638,11 @@ namespace PlattenTek {
 			++attrCount;
 		}
 
+		public void Save(string _filePath, bool useSafeFile) {
 
-		public void Save(string _filePath) {
+            if (useSafeFile) {
+                _filePath = GetSafeString(_filePath);
+            }
 
 			bodyWriter.Seek(0, SeekOrigin.Begin);
 			SaveNode(RootNode);
@@ -651,6 +682,14 @@ namespace PlattenTek {
 		}
 	}
     public class BinaryFileParser {
+
+
+        private static string MatchEval(Match match) {
+            return ((char)int.Parse(match.Value.Substring(1))).ToString();
+        }
+        public static string GetFromSafeString(string str) {
+            return Regex.Replace(str, "%[0-9A-Fa-f]{2}", MatchEval);
+        }
 
         string[ ] textLookup;
         public BinaryFileNode RootNode;
